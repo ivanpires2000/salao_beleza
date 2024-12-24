@@ -1,8 +1,8 @@
 <?php
 // Arquivo principal do aplicativo para gerenciar um salão de beleza
 
-require 'config.php';
-require 'routes.php';
+require_once 'config.php';
+require_once 'routes.php';
 
 // Configuração inicial do sistema
 function iniciarApp()
@@ -17,7 +17,15 @@ function iniciarApp()
     // Carregar as rotas
     $rotas = definirRotas();
 
-    // Identifica a rota requisitada
+    // Definir REQUEST_URI para testes locais, se não estiver definida
+    if (php_sapi_name() == "cli") {
+        // Se estiver rodando no terminal, defina um valor padrão
+        $_SERVER['REQUEST_URI'] = '/';
+    } elseif (!isset($_SERVER['REQUEST_URI'])) {
+        $_SERVER['REQUEST_URI'] = '/'; // Defina o valor padrão conforme necessário
+    }
+
+    // Verifica se a chave "REQUEST_URI" existe
     $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
     if (array_key_exists($uri, $rotas)) {
         call_user_func($rotas[$uri]);
@@ -32,28 +40,18 @@ iniciarApp();
 
 // Configuração do banco de dados e variáveis globais (config.php)
 function configurarBancoDeDados() {
-    return [
-        'host' => 'localhost',
-        'dbname' => 'salao_belezadb',
-        'user' => 'root',
-        'password' => '',
-    ];
-}
-
-// Definição de rotas (routes.php)
-function definirRotas() {
-    return [
-        '/' => 'mostrarHome',
-        '/clientes' => 'gerenciarClientes',
-        '/servicos' => 'agendarServicos',
-        '/funcionarios' => 'controlarFuncionarios',
-        '/pagamentos' => 'gerirPagamentos',
-    ];
+    return include 'config.php';
 }
 
 // Implementação de funções para cada recurso
 function mostrarHome() {
     echo "<h1>Bem-vindo ao Sistema de Gerenciamento do Salão de Beleza</h1>";
+    echo "<ul>
+            <li><a href='/clientes'>Gerenciar Clientes</a></li>
+            <li><a href='/servicos'>Agendar Serviços</a></li>
+            <li><a href='/funcionarios'>Controlar Funcionários</a></li>
+            <li><a href='/pagamentos'>Gerir Pagamentos</a></li>
+          </ul>";
 }
 
 function gerenciarClientes() {
